@@ -25,6 +25,8 @@
     "dotenv": "^16.3.1",
     "https-browserify": "^1.0.0",
     "jwt-decode": "^3.1.2",
+    "primeicons": "^6.0.1",
+    "primereact": "^9.6.2",
     "prop-types": "^15.8.1",
     "react": "^18.2.0",
     "react-chartjs-2": "5.2.0",

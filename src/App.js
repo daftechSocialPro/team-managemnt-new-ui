@@ -15,11 +15,20 @@ import { CacheProvider } from "@emotion/react";
 import createCache from "@emotion/cache";
 import routes from "routes";
 import { useMaterialUIController, setMiniSidenav, setOpenConfigurator } from "context";
-import brandWhite from "assets/images/logo-ct.png";
+import brandWhite from "assets/images/logo-ct-white.jpg";
 import brandDark from "assets/images/logo-ct-dark.png";
 import Login from "pages/Login/login";
+import {useSelector,useDispatch} from 'react-redux';
+import Loading from "components/Loading/Loading";
+import jwt_decode from "jwt-decode";
 export default function App() {
   const [controller, dispatch] = useMaterialUIController();
+
+  const dispatche = useDispatch();
+  const user = useSelector((state) => state.user);
+  const token = sessionStorage.getItem("token");
+
+  const loading = useSelector((state) => state.loading);
   const {
     miniSidenav,
     direction,
@@ -33,6 +42,21 @@ export default function App() {
   const [onMouseEnter, setOnMouseEnter] = useState(false);
   const [rtlCache, setRtlCache] = useState(null);
   const { pathname } = useLocation();
+
+  const performLogin = () => {
+    if (token) {
+      const decoded = jwt_decode(token);
+      dispatche({ type: "LOGIN_SUCCESS", payload: decoded });
+    }
+  };
+
+  useEffect(() => {
+    performLogin(); // Perform login logic when component mounts
+  }, []); // Empty dependency array ensures the effect runs only on mount
+
+  useEffect(() => {
+    performLogin(); // Perform login logic when token changes
+  }, [dispatche, token]);
 
   // Cache for the rtl
   useMemo(() => {
@@ -82,7 +106,7 @@ export default function App() {
         if (route.collapse) {
           return getRoutes(route.collapse);
         }
-        if (route.route) {
+        if (route.route && (user.user || token)) {
           return <Route exact path={route.route} element={route.component} key={route.key} />;
         }
         return null;
@@ -115,6 +139,8 @@ export default function App() {
 
   return direction === "rtl" ? (
     <CacheProvider value={rtlCache}>
+      <Toast ref={toast} />
+      {loading.loading && <Loading />}  
       <ThemeProvider theme={darkMode ? themeDarkRTL : themeRTL}>
         <CssBaseline />
         {layout === "dashboard" && (
@@ -134,12 +160,13 @@ export default function App() {
         {layout === "vr" && <Configurator />}
         <Routes>
           {getRoutes(routes)}
-          <Route path="*" element={<Navigate to="/dashboard" />} />
+          <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </ThemeProvider>
     </CacheProvider>
   ) : (
     <ThemeProvider theme={darkMode ? themeDark : theme}>
+      {loading.loading && <Loading />}  
       <CssBaseline />
       {layout === "dashboard" && (
         <>
@@ -158,7 +185,7 @@ export default function App() {
       {layout === "vr" && <Configurator />}
       <Routes>
         {getRoutes(routes)}
-        <Route path="*" element={<Navigate to="/dashboard" />} />
+        <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </ThemeProvider>
   );

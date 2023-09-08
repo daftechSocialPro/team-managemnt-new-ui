@@ -6,6 +6,7 @@ import Icon from "@mui/material/Icon";
 import Tables from "layouts/tables";
 import Project from "pages/Project/project";
 import Team from "pages/Team/team";
+import Logout from "pages/Login/logout";
 const routes = [
   {
     type: "collapse",
@@ -52,8 +53,8 @@ const routes = [
     name: "Log Out",
     key: "log-out",
     icon: <Icon fontSize="small">logout</Icon>,
-    route: "/authentication/sign-in",
-    component: <SignIn />,
+    route: "/logout",
+    component: <Logout />,
   },
   // {
   //   type: "collapse",

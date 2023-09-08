@@ -17,17 +17,28 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import App from "App";
-
+import store from './store/store';
 // Material Dashboard 2 React Context Provider
 import { MaterialUIControllerProvider } from "context";
+import { Provider } from 'react-redux';
+//theme
+import "primereact/resources/themes/lara-light-indigo/theme.css";     
+ 
+import 'primeicons/primeicons.css';
+           
+//core
+import "primereact/resources/primereact.min.css";   
 
+import 'primeicons/primeicons.css';
 const container = document.getElementById("app");
 const root = createRoot(container);
 
 root.render(
   <BrowserRouter>
-    <MaterialUIControllerProvider>
+    <MaterialUIControllerProvider >
+      <Provider store={store}>
       <App />
+      </Provider>
     </MaterialUIControllerProvider>
   </BrowserRouter>
 );
