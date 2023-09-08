@@ -1,32 +1,51 @@
-import React, { useState } from "react";
+/* eslint-disable react/prop-types */
+/* eslint-disable react/function-component-definition */
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
 import MDBox from "components/MDBox";
-import IconButton from "@mui/material/IconButton";
-import Icon from "@mui/material/Icon";
-import CreateEmployee from "./employeeCreate";
 import MDTypography from "components/MDTypography";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import DataTable from "examples/Tables/DataTable";
-import Typography from "@mui/material/Typography";
-import employeeData from "pages/Employee/data/employeeData";
-import Box from "@mui/material/Box";
+import MDAvatar from "components/MDAvatar";
+import MDBadge from "components/MDBadge";
+import IconButton from "@mui/material/IconButton";
+import Icon from "@mui/material/Icon";
+import React, { useState, useEffect } from "react";
+import { getEmployees } from "api/employeeApi";
+import { createImagePath } from "api/commonApi";
+import CreateEmployee from "./employeeCreate";
 function Employee() {
-  const { columns, rows } = employeeData();
-  const [open, setOpen] = React.useState(false);
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
-  const style = {
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    transform: "translate(-50%, -50%)",
-    width: 400,
-    bgcolor: "background.paper",
-    border: "2px solid #000",
-    boxShadow: 24,
-    p: 4,
+  const getImage = (imagePath) => {
+    return createImagePath(imagePath);
+  };
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [openDialog, setOpenDialog] = useState(false);
+  const handleOpenDialog = () => {
+    setOpenDialog(true);
+  };
+  const [employees, setEmployees] = useState([]);
+  const fetchData = async () => {
+    try {
+      const data = await getEmployees();
+      setEmployees(data);
+      setSearchResults(data);
+      console.log("employee", data);
+    } catch (error) {
+      console.error("Error fetching employees:", error);
+    }
+  };
+  useEffect(() => {
+    fetchData();
+  }, []);
+  const handleSearch = () => {
+    console.log(searchQuery);
+    const filteredResults = employees.filter((item) =>
+      item.firstName.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    setSearchResults(filteredResults);
   };
   return (
     <DashboardLayout>
@@ -51,13 +70,82 @@ function Employee() {
                 <MDTypography variant="h6" color="white">
                   Employees
                 </MDTypography>
-                <IconButton onClick={handleOpen}>
+                <IconButton onClick={handleOpenDialog}>
                   <Icon style={{ color: "white" }}>add</Icon>
                 </IconButton>
               </MDBox>
               <MDBox pt={3}>
                 <DataTable
-                  table={{ columns, rows }}
+                  table={{
+                    columns: [
+                      { Header: "employee", accessor: "employee", width: "45%", align: "left" },
+                      { Header: "position", accessor: "position", align: "left" },
+                      { Header: "status", accessor: "status", align: "center" },
+                      { Header: "employed", accessor: "employed", align: "center" },
+                      { Header: "action", accessor: "action", align: "center" },
+                    ],
+                    rows: employees.map((item) => ({
+                      employee: (
+                        <MDBox display="flex" alignItems="center" lineHeight={1}>
+                          <MDAvatar
+                            src={getImage(item.imagePath)}
+                            name={item.firstName}
+                            size="sm"
+                          />
+                          <MDBox ml={2} lineHeight={1}>
+                            <MDTypography display="block" variant="button" fontWeight="medium">
+                              {item.firstName} {item.lastName}
+                            </MDTypography>
+                            <MDTypography variant="caption">{item.email}</MDTypography>
+                          </MDBox>
+                        </MDBox>
+                      ),
+                      position: (
+                        <MDBox lineHeight={1} textAlign="left">
+                          <MDTypography
+                            display="block"
+                            variant="caption"
+                            color="text"
+                            fontWeight="medium"
+                          >
+                            {item.employmentPosition}
+                          </MDTypography>
+                        </MDBox>
+                      ),
+                      status: (
+                        <MDBox ml={-1}>
+                          <MDBadge
+                            badgeContent={item.employmentStatus}
+                            color="dark"
+                            variant="gradient"
+                            size="sm"
+                          />
+                        </MDBox>
+                      ),
+                      employed: (
+                        <MDTypography
+                          component="a"
+                          href="#"
+                          variant="caption"
+                          color="text"
+                          fontWeight="medium"
+                        >
+                          {item.employmentDate}
+                        </MDTypography>
+                      ),
+                      action: (
+                        <MDTypography
+                          component="a"
+                          href="#"
+                          variant="caption"
+                          color="text"
+                          fontWeight="medium"
+                        >
+                          Edit
+                        </MDTypography>
+                      ),
+                    })),
+                  }}
                   isSorted={false}
                   entriesPerPage={false}
                   showTotalEntries={false}
@@ -67,8 +155,8 @@ function Employee() {
             </Card>
           </Grid>
         </Grid>
-        {/* <CreateEmployee open={handleOpen} onClose={handleClose} /> */}
       </MDBox>
+      <CreateEmployee openDialog={openDialog} setOpenDialog={setOpenDialog} />
     </DashboardLayout>
   );
 }

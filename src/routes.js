@@ -4,6 +4,7 @@ import SignIn from "layouts/authentication/sign-in";
 import Employee from "pages/Employee";
 import Icon from "@mui/material/Icon";
 import Tables from "layouts/tables";
+import CreateEmployee from "pages/Employee/employeeCreate";
 import Project from "pages/Project/project";
 import Team from "pages/Team/team";
 const routes = [
@@ -61,7 +62,7 @@ const routes = [
   //   key: "tables",
   //   icon: <Icon fontSize="small">table_view</Icon>,
   //   route: "/tables",
-  //   component: <Tables />,
+  //   component: <CreateEmployee />,
   // },
 ];
 
