@@ -6,6 +6,10 @@ export const createImagePath = (imagePath) => {
   return response;
 };
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> e6b4ef86450cd4e9bc533b05b42e0e9bab8af2b4
 export function calculateEmploymentLength(startDate) {
   const employmentStartDate = new Date(startDate);
   const currentDate = new Date();
@@ -13,6 +17,7 @@ export function calculateEmploymentLength(startDate) {
   const yearsDiff = currentDate.getFullYear() - employmentStartDate.getFullYear();
   const monthsDiff = currentDate.getMonth() - employmentStartDate.getMonth();
 
+<<<<<<< HEAD
   let employmentLength = "";
 
   if (yearsDiff > 0) {
@@ -27,3 +32,17 @@ export function calculateEmploymentLength(startDate) {
 
   return employmentLength || "No employment length data available";
 }
+=======
+  let employmentLength = '';
+
+  if (yearsDiff > 0) {
+    employmentLength += `${yearsDiff} year${yearsDiff > 1 ? 's' : ''}`;
+  }
+
+  if (monthsDiff > 0) {
+    employmentLength += `${employmentLength ? ' ' : ''}${monthsDiff} month${monthsDiff > 1 ? 's' : ''}`;
+  }
+
+  return employmentLength || 'No employment length data available';
+}
+>>>>>>> e6b4ef86450cd4e9bc533b05b42e0e9bab8af2b4
