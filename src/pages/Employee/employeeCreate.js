@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 /* eslint-disable react/function-component-definition */
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { FileUploader } from "react-drag-drop-files";
 import {
   Button,
@@ -11,51 +11,87 @@ import {
   TextField,
   IconButton,
   Grid,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Avatar,
 } from "@mui/material";
+import { useDispatch } from "react-redux";
+import { setLoading } from "../../store/loadingReducer";
+import { createEmployee } from "api/employeeApi";
 import CloseIcon from "@mui/icons-material/Close";
+// import { Toast } from "primereact/toast";
 import { CancelOutlined, CheckCircleOutlined } from "@mui/icons-material";
-const CreateEmployee = ({ openDialog, setOpenDialog }) => {
+const CreateEmployee = ({ openDialog, setOpenDialog, user }) => {
   const fileTypes = ["JPG", "PNG", "GIF"];
-  const [selectedImage, setSelectedImage] = useState("");
-  const [selectedGender, setSelectedGender] = useState("");
-  const handleGenderSelect = (event) => {
-    setSelectedGender(event.target.value);
-  };
   const handleImageChange = (file) => {
     const imageURL = URL.createObjectURL(file);
     setSelectedImage(imageURL);
-    setFile(file);
   };
-  const [formData, setFormData] = useState({
-    FirstName: "",
-    LastName: "",
-    // Rest of the form data
-  });
+  const toast = useRef(null);
+
+  const show = (severity, summary, message) => {
+    toast.current &&
+      toast.current.show({
+        severity: severity,
+        summary: summary,
+        detail: message,
+      });
+  };
+  const dispatch = useDispatch();
+  const [selectedImage, setSelectedImage] = useState("");
+  const [ImagePath, setFile] = useState(null);
+  const [FirstName, setFirstName] = useState("");
+  const [LastName, setLastName] = useState("");
+  const [Gender, setGender] = useState("male");
+  const [BirthDate, setBirthday] = useState("");
+  const [PhoneNumber, setPhone] = useState("");
+  const [Email, setEmail] = useState("");
+  const [Address, setAddress] = useState("");
+  const [EmploymentDate, setHireDate] = useState("");
+  const [Telegram, setTelegram] = useState("");
+  const [Twitter, setTwitter] = useState("");
+  const [Facebook, setFacebook] = useState("");
+  const [Instagram, setInstagram] = useState("");
+  const [EmploymentPosition, setPosition] = useState("");
+  const CreatedById = user.user && user.user.userId;
+  const handleCreate = async (e) => {
+    e.preventDefault();
+    // dispatch(setLoading(true));
+    const formData = new FormData();
+    formData.append("FirstName", FirstName);
+    formData.append("LastName", LastName);
+    formData.append("Gender", Gender);
+    formData.append("PhoneNumber", PhoneNumber);
+    formData.append("BirthDate", BirthDate);
+    formData.append("Email", Email);
+    formData.append("Address", Address);
+    formData.append("EmploymentDate", EmploymentDate);
+    formData.append("EmploymentPosition", EmploymentPosition);
+    formData.append("Telegram", Telegram);
+    formData.append("Twitter", Twitter);
+    formData.append("Facebook", Facebook);
+    formData.append("Instagram", Instagram);
+    formData.append("ImagePath", selectedImage);
+    formData.append("CreatedById", CreatedById);
+    console.log("formData", formData);
+
+    try {
+      const response = await createEmployee(formData);
+
+      if (response.success) {
+        show("success", "SUCCESS", response.message);
+        handleCloseDialog();
+        // dispatch(setLoading(false));
+      } else {
+        show("error", "ERROR", response.message);
+        dispatch(setLoading(false));
+      }
+    } catch (error) {
+      // Handle the error
+      show("error", "ERROR", error);
+      // dispatch(setLoading(false));
+    }
+  };
 
   const handleCloseDialog = () => {
     setOpenDialog(false);
-  };
-
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-    setFormData((prevData) => ({ ...prevData, [name]: value }));
-  };
-
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    // Here, you can use the formData for further processing or API calls
-    console.log(formData);
-    handleCloseDialog();
-  };
-  const [selectedDate, setSelectedDate] = useState(null);
-
-  const handleDateChange = (date) => {
-    setSelectedDate(date);
   };
 
   return (
@@ -71,11 +107,11 @@ const CreateEmployee = ({ openDialog, setOpenDialog }) => {
         </IconButton>
       </DialogTitle>
       <DialogContent>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleCreate}>
           <Grid container spacing={2}>
             <Grid item xs={12} sm={8}>
               <FileUploader
-                handleChange={handleImageChange}
+                handleChange={(file) => handleImageChange(file)}
                 name="file"
                 types={fileTypes}
                 sx={{ marginLeft: 5 }}
@@ -87,8 +123,9 @@ const CreateEmployee = ({ openDialog, setOpenDialog }) => {
                   <TextField
                     select
                     label="Gender"
-                    value={selectedGender}
-                    onChange={handleGenderSelect}
+                    value={Gender}
+                    on
+                    onChange={(e) => setGender(e.target.value)}
                     size="medium"
                     SelectProps={{
                       native: true,
@@ -97,8 +134,8 @@ const CreateEmployee = ({ openDialog, setOpenDialog }) => {
                     <option value="" disabled>
                       Gender
                     </option>
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
+                    <option value="MALE">MALE</option>
+                    <option value="FEMALE">FEMALE</option>
                   </TextField>
                 </Grid>
               </Grid>
@@ -107,8 +144,8 @@ const CreateEmployee = ({ openDialog, setOpenDialog }) => {
               <TextField
                 name="FirstName"
                 label="First Name"
-                value={formData.FirstName}
-                onChange={handleChange}
+                value={FirstName}
+                onChange={(e) => setFirstName(e.target.value)}
                 fullWidth
               />
             </Grid>
@@ -116,8 +153,8 @@ const CreateEmployee = ({ openDialog, setOpenDialog }) => {
               <TextField
                 name="LastName"
                 label="Last Name"
-                value={formData.FirstName}
-                onChange={handleChange}
+                value={LastName}
+                onChange={(e) => setLastName(e.target.value)}
                 fullWidth
               />
             </Grid>
@@ -125,8 +162,8 @@ const CreateEmployee = ({ openDialog, setOpenDialog }) => {
               <TextField
                 label="Birth Date"
                 type="date"
-                value={selectedDate}
-                onChange={handleDateChange}
+                value={BirthDate}
+                onChange={(e) => setBirthday(e.target.value)}
                 InputLabelProps={{
                   shrink: true,
                 }}
@@ -137,8 +174,8 @@ const CreateEmployee = ({ openDialog, setOpenDialog }) => {
               <TextField
                 name="Phone"
                 label="Phone"
-                value={formData.FirstName}
-                onChange={handleChange}
+                value={PhoneNumber}
+                onChange={(e) => setPhone(e.target.value)}
                 fullWidth
               />
             </Grid>
@@ -146,8 +183,8 @@ const CreateEmployee = ({ openDialog, setOpenDialog }) => {
               <TextField
                 label="Email"
                 type="email"
-                value={selectedDate}
-                onChange={handleDateChange}
+                value={Email}
+                onChange={(e) => setEmail(e.target.value)}
                 InputLabelProps={{
                   shrink: true,
                 }}
@@ -158,8 +195,8 @@ const CreateEmployee = ({ openDialog, setOpenDialog }) => {
               <TextField
                 name="Address"
                 label="Adress"
-                value={formData.FirstName}
-                onChange={handleChange}
+                value={Address}
+                onChange={(e) => setAddress(e.target.value)}
                 fullWidth
               />
             </Grid>
@@ -167,8 +204,8 @@ const CreateEmployee = ({ openDialog, setOpenDialog }) => {
               <TextField
                 label="Hire Date"
                 type="date"
-                value={selectedDate}
-                onChange={handleDateChange}
+                value={EmploymentDate}
+                onChange={(e) => setHireDate(e.target.value)}
                 InputLabelProps={{
                   shrink: true,
                 }}
@@ -179,8 +216,8 @@ const CreateEmployee = ({ openDialog, setOpenDialog }) => {
               <TextField
                 select
                 label="Position"
-                value={selectedGender}
-                onChange={handleGenderSelect}
+                value={EmploymentPosition}
+                onChange={(e) => setPosition(e.target.value)}
                 SelectProps={{
                   native: true,
                 }}
@@ -189,16 +226,19 @@ const CreateEmployee = ({ openDialog, setOpenDialog }) => {
                 <option value="" disabled>
                   Position
                 </option>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
+                <option value="DEPUTY_MANAGER">DEPUTY_MANAGER</option>
+                <option value="HRM">HRM</option>
+                <option value="FINANCE">FINANCE</option>
+                <option value="MARKETING">MARKETING</option>
+                <option value="DEVELOPER">DEVELOPER</option>
               </TextField>
             </Grid>
             <Grid item xs={12} sm={6}>
               <TextField
                 name="Instagram"
                 label="Instagram"
-                value={formData.FirstName}
-                onChange={handleChange}
+                value={Instagram}
+                onChange={(e) => setInstagram(e.target.value)}
                 fullWidth
               />
             </Grid>
@@ -206,8 +246,8 @@ const CreateEmployee = ({ openDialog, setOpenDialog }) => {
               <TextField
                 name="Telegram"
                 label="Telegram"
-                value={formData.FirstName}
-                onChange={handleChange}
+                value={Telegram}
+                onChange={(e) => setTelegram(e.target.value)}
                 fullWidth
               />
             </Grid>
@@ -215,8 +255,8 @@ const CreateEmployee = ({ openDialog, setOpenDialog }) => {
               <TextField
                 name="Tweeter"
                 label="Tweeter"
-                value={formData.FirstName}
-                onChange={handleChange}
+                value={Twitter}
+                onChange={(e) => setTwitter(e.target.value)}
                 fullWidth
               />
             </Grid>
@@ -224,8 +264,8 @@ const CreateEmployee = ({ openDialog, setOpenDialog }) => {
               <TextField
                 name="Facebook"
                 label="Facebook"
-                value={formData.FirstName}
-                onChange={handleChange}
+                value={Facebook}
+                onChange={(e) => setFacebook(e.target.value)}
                 fullWidth
               />
             </Grid>
@@ -242,9 +282,10 @@ const CreateEmployee = ({ openDialog, setOpenDialog }) => {
           Cancel
         </Button>
         <Button
-          onClick={handleSubmit}
+          type="submit"
           color="primary"
           variant="containedPrimary"
+          onClick={handleCreate}
           startIcon={<CheckCircleOutlined />}
         >
           Submit

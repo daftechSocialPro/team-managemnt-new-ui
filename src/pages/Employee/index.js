@@ -11,16 +11,17 @@ import MDAvatar from "components/MDAvatar";
 import MDBadge from "components/MDBadge";
 import IconButton from "@mui/material/IconButton";
 import Icon from "@mui/material/Icon";
+import { DataGrid, GridColDef, GridValueGetterParams } from "@mui/x-data-grid";
 import React, { useState, useEffect } from "react";
 import { getEmployees } from "api/employeeApi";
 import { createImagePath } from "api/commonApi";
+import { useSelector } from "react-redux";
 import CreateEmployee from "./employeeCreate";
-function Employee() {
+function Employee({ show }) {
   const getImage = (imagePath) => {
     return createImagePath(imagePath);
   };
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState([]);
+  const user = useSelector((state) => state.user);
   const [openDialog, setOpenDialog] = useState(false);
   const handleOpenDialog = () => {
     setOpenDialog(true);
@@ -30,7 +31,6 @@ function Employee() {
     try {
       const data = await getEmployees();
       setEmployees(data);
-      setSearchResults(data);
       console.log("employee", data);
     } catch (error) {
       console.error("Error fetching employees:", error);
@@ -38,15 +38,7 @@ function Employee() {
   };
   useEffect(() => {
     fetchData();
-  }, []);
-  const handleSearch = () => {
-    console.log(searchQuery);
-    const filteredResults = employees.filter((item) =>
-      item.firstName.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-
-    setSearchResults(filteredResults);
-  };
+  }, [openDialog]);
   return (
     <DashboardLayout>
       <DashboardNavbar />
@@ -75,28 +67,51 @@ function Employee() {
                 </IconButton>
               </MDBox>
               <MDBox pt={3}>
-                <DataTable
+                {/* <DataTable
                   table={{
                     columns: [
-                      { Header: "employee", accessor: "employee", width: "45%", align: "left" },
-                      { Header: "position", accessor: "position", align: "left" },
+                      {
+                        Header: "employee",
+                        accessor: "employee",
+                        width: "45%",
+                        align: "left",
+                      },
+                      {
+                        Header: "position",
+                        accessor: "position",
+                        align: "left",
+                      },
                       { Header: "status", accessor: "status", align: "center" },
-                      { Header: "employed", accessor: "employed", align: "center" },
+                      {
+                        Header: "employed",
+                        accessor: "employed",
+                        align: "center",
+                      },
                       { Header: "action", accessor: "action", align: "center" },
                     ],
                     rows: employees.map((item) => ({
                       employee: (
-                        <MDBox display="flex" alignItems="center" lineHeight={1}>
+                        <MDBox
+                          display="flex"
+                          alignItems="center"
+                          lineHeight={1}
+                        >
                           <MDAvatar
                             src={getImage(item.imagePath)}
                             name={item.firstName}
                             size="sm"
                           />
                           <MDBox ml={2} lineHeight={1}>
-                            <MDTypography display="block" variant="button" fontWeight="medium">
+                            <MDTypography
+                              display="block"
+                              variant="button"
+                              fontWeight="medium"
+                            >
                               {item.firstName} {item.lastName}
                             </MDTypography>
-                            <MDTypography variant="caption">{item.email}</MDTypography>
+                            <MDTypography variant="caption">
+                              {item.email}
+                            </MDTypography>
                           </MDBox>
                         </MDBox>
                       ),
@@ -150,13 +165,18 @@ function Employee() {
                   entriesPerPage={false}
                   showTotalEntries={false}
                   noEndBorder
-                />
+                /> */}
               </MDBox>
             </Card>
           </Grid>
         </Grid>
       </MDBox>
-      <CreateEmployee openDialog={openDialog} setOpenDialog={setOpenDialog} />
+      <CreateEmployee
+        openDialog={openDialog}
+        setOpenDialog={setOpenDialog}
+        show={show}
+        user={user}
+      />
     </DashboardLayout>
   );
 }

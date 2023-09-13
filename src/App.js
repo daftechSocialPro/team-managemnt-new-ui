@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -21,13 +21,23 @@ import Login from "pages/Login/login";
 import {useSelector,useDispatch} from 'react-redux';
 import Loading from "components/Loading/Loading";
 import jwt_decode from "jwt-decode";
+import { Toast } from "primereact/toast";
 export default function App() {
   const [controller, dispatch] = useMaterialUIController();
 
   const dispatche = useDispatch();
   const user = useSelector((state) => state.user);
   const token = sessionStorage.getItem("token");
+  const toast = useRef(null);
 
+  const show = (severity, summary, message) => {
+    toast.current &&
+      toast.current.show({
+        severity: severity,
+        summary: summary,
+        detail: message,
+      });
+  };
   const loading = useSelector((state) => state.loading);
   const {
     miniSidenav,
